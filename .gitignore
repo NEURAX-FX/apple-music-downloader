@@ -7,3 +7,9 @@
 !main.go
 !README.md
 !utils/*
+!amdl
+!build.sh
+!main_test.go
+!utils/runv2/*
+!utils/runv2/
+!utils/runv2/runv2_test.go

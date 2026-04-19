@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/itouakirai/mp4ff/mp4"
@@ -23,6 +24,37 @@ import (
 )
 const prefetchKey = "skd://itunes.apple.com/P000000000/s1/e1"
 var ErrTimeout = errors.New("response timed out")
+var debugOut io.Writer = os.Stdout
+
+func amdlDebugEnabled() bool {
+	v := strings.TrimSpace(strings.ToLower(os.Getenv("AMDL_DEBUG")))
+	return v == "1" || v == "true" || v == "yes" || v == "on"
+}
+
+func debugPrintf(format string, a ...any) {
+	if !amdlDebugEnabled() {
+		return
+	}
+	fmt.Fprintf(debugOut, format, a...)
+}
+
+func hexPreview(data []byte, limit int) string {
+	if len(data) < limit {
+		limit = len(data)
+	}
+	parts := make([]string, 0, limit)
+	for _, b := range data[:limit] {
+		parts = append(parts, fmt.Sprintf("%02x", b))
+	}
+	return strings.Join(parts, " ")
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
 
 type TimedResponseBody struct {
 	timeout   time.Duration
@@ -485,6 +517,7 @@ func cbcsFullSubsampleDecrypt(data []byte, conn *bufio.ReadWriter) error {
 	// function would just return them as-is, but we're truncating the data here
 	// for clarity and interoperability
 	truncatedLen := len(data) & ^0xf
+	before := append([]byte(nil), data[:min(truncatedLen, 24)]...)
 	// send the whole chunk at once
 	err := binary.Write(conn, binary.LittleEndian, uint32(truncatedLen))
 	if err != nil {
@@ -499,6 +532,9 @@ func cbcsFullSubsampleDecrypt(data []byte, conn *bufio.ReadWriter) error {
 		return err
 	}
 	_, err = io.ReadFull(conn, data[:truncatedLen])
+	if err == nil {
+		debugPrintf("[runv2] full sample size=%d before=%s after=%s\n", truncatedLen, hexPreview(before, 24), hexPreview(data[:min(truncatedLen, 24)], 24))
+	}
 	return err
 }
 
@@ -609,6 +645,9 @@ func cbcsDecryptSamples(samples []mp4.FullSample, conn *bufio.ReadWriter,
 	tenc *mp4.TencBox, senc *mp4.SencBox) error {
 
 	for i := range samples {
+		if i < 3 {
+			debugPrintf("[runv2] decrypt sample[%d] size=%d preview=%s\n", i, len(samples[i].Data), hexPreview(samples[i].Data, 24))
+		}
 		var subSamplePatterns []mp4.SubSamplePattern
 		if len(senc.SubSamples) != 0 {
 			subSamplePatterns = senc.SubSamples[i]

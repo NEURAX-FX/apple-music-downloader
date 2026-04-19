@@ -66,7 +66,11 @@ type AddedTrack struct {
 }
 
 func loadConfig() error {
-	data, err := os.ReadFile("config.yaml")
+	configPath, err := resolveConfigPath()
+	if err != nil {
+		return err
+	}
+	data, err := os.ReadFile(configPath)
 	if err != nil {
 		return err
 	}
@@ -78,6 +82,26 @@ func loadConfig() error {
 		Config.Storefront = "us"
 	}
 	return nil
+}
+
+func resolveConfigPath() (string, error) {
+	if override := strings.TrimSpace(os.Getenv("AMDL_CONFIG")); override != "" {
+		return override, nil
+	}
+
+	home, err := os.UserHomeDir()
+	if err == nil && home != "" {
+		xdgPath := filepath.Join(home, ".config", "amdl", "config.yaml")
+		if ok, statErr := fileExists(xdgPath); statErr == nil && ok {
+			return xdgPath, nil
+		}
+	}
+
+	localPath, err := filepath.Abs("config.yaml")
+	if err != nil {
+		return "", err
+	}
+	return localPath, nil
 }
 
 func LimitString(s string) string {

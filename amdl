@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+set -eu
+
+script_path=$(readlink -f -- "$0")
+repo_dir=$(CDPATH='' cd -- "$(dirname -- "$script_path")" && pwd)
+binary_dir="$repo_dir/bin"
+binary="$binary_dir/apple-music-dl"
+
+needs_build=0
+if [ ! -x "$binary" ]; then
+  needs_build=1
+elif [ "$repo_dir/main.go" -nt "$binary" ] || [ "$repo_dir/go.mod" -nt "$binary" ] || [ "$repo_dir/go.sum" -nt "$binary" ]; then
+  needs_build=1
+fi
+
+if [ "$needs_build" -eq 1 ]; then
+  printf '%s\n' '[amdl] building apple-music-dl...'
+  mkdir -p "$binary_dir"
+  (
+    cd "$repo_dir"
+    GOWORK=off go build -mod=mod -o "$binary" .
+  )
+fi
+
+exec "$binary" "$@"
