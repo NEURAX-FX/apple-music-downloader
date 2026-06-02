@@ -1,6 +1,6 @@
-module main
+module apple-music-downloader
 
-go 1.23.1
+go 1.26.3
 
 require (
 	github.com/aead/cmac v0.0.0-20160719120800-7af84192f0b1

@@ -9,8 +9,8 @@ import (
 	"github.com/go-resty/resty/v2"
 	"google.golang.org/protobuf/proto"
 
-	cdm "main/utils/runv3/cdm"
-	key "main/utils/runv3/key"
+	cdm "apple-music-downloader/utils/runv3/cdm"
+	key "apple-music-downloader/utils/runv3/key"
 	"os"
 
 	"bytes"

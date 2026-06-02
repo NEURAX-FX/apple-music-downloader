@@ -20,12 +20,12 @@ import (
 	"strings"
 	"time"
 
-	"main/utils/ampapi"
-	"main/utils/lyrics"
-	"main/utils/runv2"
-	"main/utils/runv3"
-	"main/utils/structs"
-	"main/utils/task"
+	"apple-music-downloader/utils/ampapi"
+	"apple-music-downloader/utils/lyrics"
+	"apple-music-downloader/utils/runv2"
+	"apple-music-downloader/utils/runv3"
+	"apple-music-downloader/utils/structs"
+	"apple-music-downloader/utils/task"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/fatih/color"
