@@ -4,8 +4,13 @@ set -eu
 repo_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 binary_dir="$repo_dir/bin"
 binary="$binary_dir/apple-music-dl"
-global_wrapper="/usr/local/bin/amdl"
-config_dir="${HOME:-/root}/.config/amdl"
+termux_prefix="/data/data/com.termux/files/usr"
+if [ "${PREFIX:-}" = "$termux_prefix" ]; then
+	global_wrapper="$PREFIX/bin/amdl"
+else
+	global_wrapper="/usr/local/bin/amdl"
+fi
+config_dir="${HOME:-~}/.config/amdl"
 config_path="$config_dir/config.yaml"
 
 mkdir -p "$binary_dir"
