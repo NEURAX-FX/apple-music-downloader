@@ -6,6 +6,7 @@
 !go.sum
 !main.go
 !README.md
+!utils/
 !utils/*
 !amdl
 !build.sh
@@ -13,3 +14,6 @@
 !utils/runv2/*
 !utils/runv2/
 !utils/runv2/runv2_test.go
+!utils/ampapi/
+!utils/ampapi/*
+!utils/ampapi/token_test.go

@@ -68,3 +68,14 @@ func TestResolveConfigPathFallsBackToLocalConfig(t *testing.T) {
 		t.Fatalf("unexpected config path %q want %q", got, localConfig)
 	}
 }
+
+func TestCheckUrlSongAcceptsAlbumUrlWithSongQuery(t *testing.T) {
+	storefront, songID := checkUrlSong("https://music.apple.com/cn/album/a-temporary-high/1692377933?i=1692377941&ls")
+
+	if storefront != "cn" {
+		t.Fatalf("unexpected storefront %q", storefront)
+	}
+	if songID != "1692377941" {
+		t.Fatalf("unexpected song ID %q", songID)
+	}
+}

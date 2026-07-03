@@ -1,6 +1,7 @@
 package ampapi
 
 import (
+	"errors"
 	"io"
 	"net/http"
 	"regexp"
@@ -42,8 +43,14 @@ func GetToken() (string, error) {
 		return "", err
 	}
 
-	regex = regexp.MustCompile(`eyJh([^"]*)`)
-	token := regex.FindString(string(body))
+	return extractDeveloperToken(body)
+}
 
-	return token, nil
+func extractDeveloperToken(body []byte) (string, error) {
+	regex := regexp.MustCompile(`eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+`)
+	token := regex.Find(body)
+	if len(token) == 0 {
+		return "", errors.New("developer token not found")
+	}
+	return string(token), nil
 }

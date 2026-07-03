@@ -150,15 +150,22 @@ func checkUrlMv(url string) (string, string) {
 		return matches[0][1], matches[0][2]
 	}
 }
-func checkUrlSong(url string) (string, string) {
+func checkUrlSong(rawURL string) (string, string) {
 	pat := regexp.MustCompile(`^(?:https:\/\/(?:beta\.music|music|classical\.music)\.apple\.com\/(\w{2})(?:\/song|\/song\/.+))\/(?:id)?(\d[^\D]+)(?:$|\?)`)
-	matches := pat.FindAllStringSubmatch(url, -1)
+	matches := pat.FindAllStringSubmatch(rawURL, -1)
 
-	if matches == nil {
-		return "", ""
-	} else {
+	if matches != nil {
 		return matches[0][1], matches[0][2]
 	}
+	storefront, _ := checkUrl(rawURL)
+	if storefront == "" {
+		return "", ""
+	}
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		return "", ""
+	}
+	return storefront, parsed.Query().Get("i")
 }
 func checkUrlPlaylist(url string) (string, string) {
 	pat := regexp.MustCompile(`^(?:https:\/\/(?:beta\.music|music|classical\.music)\.apple\.com\/(\w{2})(?:\/playlist|\/playlist\/.+))\/(?:id)?(pl\.[\w-]+)(?:$|\?)`)
