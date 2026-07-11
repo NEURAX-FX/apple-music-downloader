@@ -79,3 +79,13 @@ func TestCheckUrlSongAcceptsAlbumUrlWithSongQuery(t *testing.T) {
 		t.Fatalf("unexpected song ID %q", songID)
 	}
 }
+
+func TestParseItunesStoreIDSkipsValuesUnsupportedByMP4TagWriter(t *testing.T) {
+	if id, ok := parseItunesStoreID("1234567890"); !ok || id != 1234567890 {
+		t.Fatalf("expected supported ID, got id=%d ok=%t", id, ok)
+	}
+
+	if id, ok := parseItunesStoreID("6786111290"); ok || id != 0 {
+		t.Fatalf("expected oversized ID to be skipped, got id=%d ok=%t", id, ok)
+	}
+}

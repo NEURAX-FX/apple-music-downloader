@@ -1833,19 +1833,15 @@ func writeMP4Tags(track *task.Track, lrc string) error {
 	}
 
 	if track.PreType == "albums" {
-		albumID, err := strconv.ParseUint(track.PreID, 10, 32)
-		if err != nil {
-			return err
+		if albumID, ok := parseItunesStoreID(track.PreID); ok {
+			t.ItunesAlbumID = albumID
 		}
-		t.ItunesAlbumID = int32(albumID)
 	}
 
 	if len(track.Resp.Relationships.Artists.Data) > 0 {
-		artistID, err := strconv.ParseUint(track.Resp.Relationships.Artists.Data[0].ID, 10, 32)
-		if err != nil {
-			return err
+		if artistID, ok := parseItunesStoreID(track.Resp.Relationships.Artists.Data[0].ID); ok {
+			t.ItunesArtistID = artistID
 		}
-		t.ItunesArtistID = int32(artistID)
 	}
 
 	if (track.PreType == "playlists" || track.PreType == "stations") && !Config.UseSongInfoForPlaylist {
@@ -1896,6 +1892,14 @@ func writeMP4Tags(track *task.Track, lrc string) error {
 		return err
 	}
 	return nil
+}
+
+func parseItunesStoreID(id string) (int32, bool) {
+	parsed, err := strconv.ParseInt(id, 10, 32)
+	if err != nil || parsed <= 0 {
+		return 0, false
+	}
+	return int32(parsed), true
 }
 
 func main() {
