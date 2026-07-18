@@ -78,10 +78,45 @@ func loadConfig() error {
 	if err != nil {
 		return err
 	}
+	if cookieToken, err := readMediaUserTokenCookie(filepath.Join(filepath.Dir(configPath), ".cookie")); err != nil {
+		return err
+	} else if cookieToken != "" {
+		Config.MediaUserToken = cookieToken
+	}
+	Config.MediaUserToken = normalizeMediaUserToken(Config.MediaUserToken)
 	if len(Config.Storefront) != 2 {
 		Config.Storefront = "us"
 	}
 	return nil
+}
+
+func readMediaUserTokenCookie(path string) (string, error) {
+	ok, err := fileExists(path)
+	if err != nil || !ok {
+		return "", err
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	return normalizeMediaUserToken(string(data)), nil
+}
+
+func normalizeMediaUserToken(raw string) string {
+	raw = strings.TrimSpace(raw)
+	for _, part := range strings.Split(raw, ";") {
+		part = strings.TrimSpace(part)
+		if strings.HasPrefix(part, "media-user-token=") {
+			return strings.TrimSpace(strings.TrimPrefix(part, "media-user-token="))
+		}
+	}
+	for _, line := range strings.Split(raw, "\n") {
+		fields := strings.Fields(strings.TrimSpace(line))
+		if len(fields) >= 7 && fields[5] == "media-user-token" {
+			return strings.TrimSpace(fields[6])
+		}
+	}
+	return raw
 }
 
 func resolveConfigPath() (string, error) {
